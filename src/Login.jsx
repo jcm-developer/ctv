@@ -61,8 +61,7 @@ function Login({ onLogin }) {
             <div className="background-filter"></div>
             <div className="login-box">
                 <div className="login-header">
-                    <span className="material-symbols-rounded login-icon">movie</span>
-                    <h1>MyFilms</h1>
+                    <h1>Cortés TV+</h1>
                     <p>Inicia sesión para continuar</p>
                 </div>
 
@@ -100,7 +99,6 @@ function Login({ onLogin }) {
                     )}
 
                     <button type="submit" className="login-button">
-                        <span className="material-symbols-rounded">login</span>
                         Iniciar Sesión
                     </button>
                 </form>
