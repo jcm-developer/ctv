@@ -3,16 +3,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--apple-bg);
+    /* background: var(--apple-bg); */
+    background-image: url("/login-background.png");
+    backdrop-filter: blur(8px);
     padding: 2rem;
 }
 
+.background-filter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: -1;
+}
+
 .login-box {
-    background: var(--apple-surface);
+    background: rgba(28, 28, 30, 0.6);
+    backdrop-filter: blur(10px);
     border: 1px solid var(--apple-border);
     border-radius: 12px;
     padding: 3rem;
-    max-width: 420px;
+    max-width: 600px;
     width: 100%;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }

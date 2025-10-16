@@ -58,6 +58,7 @@ function Login({ onLogin }) {
 
     return (
         <div className="login-container">
+            <div className="background-filter"></div>
             <div className="login-box">
                 <div className="login-header">
                     <span className="material-symbols-rounded login-icon">movie</span>
