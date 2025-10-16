@@ -23,6 +23,7 @@ function App() {
   const [actorMovies, setActorMovies] = useState([])
   const [actorSearchTerm, setActorSearchTerm] = useState('')
   const [loadingActorMovies, setLoadingActorMovies] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const API_URL = import.meta.env.VITE_API_URL
   const TOKEN = import.meta.env.VITE_TOKEN
@@ -348,11 +349,12 @@ function App() {
       <nav className="navbar">
         <div className="nav-brand">
           <h1>
-            <span className="material-symbols-rounded">movie</span>
-            MyFilms
+            Cortés TV+
           </h1>
         </div>
-        <div className="nav-links">
+
+        {/* Desktop Navigation */}
+        <div className="nav-links desktop-nav">
           <button
             className={`nav-button ${currentView === 'home' ? 'active' : ''}`}
             onClick={() => setCurrentView('home')}
@@ -374,7 +376,68 @@ function App() {
             </button>
           </div>
         </div>
+
+        {/* Mobile Hamburger Button */}
+        <button
+          className="hamburger-button"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span className="material-symbols-rounded">
+            {mobileMenuOpen ? 'close' : 'menu'}
+          </span>
+        </button>
       </nav>
+
+      {/* Mobile Menu Sidebar */}
+      <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+        <div className="mobile-menu-header">
+          <span className="user-name">{currentUser}</span>
+        </div>
+
+        <div className="mobile-menu-links">
+          <button
+            className={`mobile-nav-button ${currentView === 'home' ? 'active' : ''}`}
+            onClick={() => {
+              setCurrentView('home')
+              setMobileMenuOpen(false)
+            }}
+          >
+            <span className="material-symbols-rounded">home</span>
+            Inicio
+          </button>
+
+          <button
+            className={`mobile-nav-button ${currentView === 'lists' ? 'active' : ''}`}
+            onClick={() => {
+              setCurrentView('lists')
+              setMobileMenuOpen(false)
+            }}
+          >
+            <span className="material-symbols-rounded">lists</span>
+            Mis Listas
+          </button>
+
+          <button
+            className="mobile-nav-button logout"
+            onClick={() => {
+              handleLogout()
+              setMobileMenuOpen(false)
+            }}
+          >
+            <span className="material-symbols-rounded">logout</span>
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="mobile-menu-overlay"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
       {currentView === 'home' && (
         <div className="home-view">
@@ -389,6 +452,15 @@ function App() {
                 onChange={handleSearchChange}
                 className="search-input"
               />
+              {searchTerm && (
+                <button
+                  className="search-clear-btn"
+                  onClick={() => setSearchTerm('')}
+                  aria-label="Limpiar búsqueda"
+                >
+                  <span className="material-symbols-rounded">close</span>
+                </button>
+              )}
             </div>
           </header>
 
@@ -446,7 +518,6 @@ function App() {
         <div className="lists-view">
           <div className="lists-header">
             <h2>
-              <span className="material-symbols-rounded">lists</span>
               Mis Listas
             </h2>
             <button
@@ -466,27 +537,49 @@ function App() {
                   <p className="hint">Crea una lista para organizar tus películas favoritas</p>
                 </div>
               ) : (
-                lists.map(list => (
-                  <div key={list.id} className="list-card">
-                    <div className="list-header">
-                      <h3>{list.name}</h3>
+                lists.map(list => {
+                  const lastItem = list.items[list.items.length - 1]
+                  const posterPath = lastItem?.poster_path || lastItem?.backdrop_path
+
+                  return (
+                    <div
+                      key={list.id}
+                      className="list-card"
+                      onClick={() => setSelectedList(list)}
+                    >
+                      <div className="list-card-poster">
+                        {posterPath ? (
+                          <img
+                            src={`https://image.tmdb.org/t/p/w500${posterPath}`}
+                            alt={list.name}
+                          />
+                        ) : (
+                          <div className="list-card-placeholder">
+                            <span className="material-symbols-rounded">movie</span>
+                          </div>
+                        )}
+                        <div className="list-card-gradient"></div>
+                        <div className="list-card-content">
+                          <h3>{list.name}</h3>
+                          <p className="list-count">
+                            <span className="material-symbols-rounded">movie</span>
+                            {list.items.length} {list.items.length === 1 ? 'elemento' : 'elementos'}
+                          </p>
+                        </div>
+                      </div>
                       <button
-                        className="delete-btn"
-                        onClick={() => deleteList(list.id)}
+                        className="list-delete-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          deleteList(list.id)
+                        }}
                         title="Eliminar lista"
                       >
                         <span className="material-symbols-rounded">delete</span>
                       </button>
                     </div>
-                    <p className="list-count">{list.items.length} elementos</p>
-                    <button
-                      className="view-list-btn"
-                      onClick={() => setSelectedList(list)}
-                    >
-                      Ver Lista
-                    </button>
-                  </div>
-                ))
+                  )
+                })
               )}
             </div>
           ) : (
@@ -604,11 +697,11 @@ function App() {
                 required
               />
               <div className="modal-buttons">
-                <button type="button" onClick={() => setShowCreateList(false)} className="cancel-btn">
-                  Cancelar
-                </button>
                 <button type="submit" className="submit-btn">
                   Crear
+                </button>
+                <button type="button" onClick={() => setShowCreateList(false)} className="cancel-btn">
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -626,16 +719,6 @@ function App() {
             {lists.length === 0 ? (
               <div className="empty-state">
                 <p>No tienes listas creadas</p>
-                <button
-                  onClick={() => {
-                    setShowAddToList(false)
-                    setCurrentView('lists')
-                    setShowCreateList(true)
-                  }}
-                  className="submit-btn"
-                >
-                  Crear Lista
-                </button>
               </div>
             ) : (
               <div className="lists-selection">
@@ -653,6 +736,18 @@ function App() {
             )}
 
             <div className="modal-buttons">
+              {lists.length === 0 && (
+                <button
+                  onClick={() => {
+                    setShowAddToList(false)
+                    setCurrentView('lists')
+                    setShowCreateList(true)
+                  }}
+                  className="submit-btn"
+                >
+                  Crear Lista
+                </button>
+              )}
               <button onClick={() => setShowAddToList(false)} className="cancel-btn">
                 Cancelar
               </button>
